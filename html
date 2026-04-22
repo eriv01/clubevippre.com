@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Confirmação de Acesso</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --pink: #ff2d78;
+    --pink-light: #ff6fa8;
+    --pink-glow: rgba(255,45,120,0.35);
+    --black: #0a0a0a;
+    --black2: #111117;
+    --card: #16101a;
+    --text: #f0e8f0;
+    --muted: #9a7fa8;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Raleway', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Animated grain */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  .wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Top glow blob */
+  .glow-top {
+    position: fixed;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,45,120,0.25) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Disclaimer bar */
+  .disclaimer-bar {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,45,120,0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 0.03em;
+    line-height: 1.5;
+    margin-bottom: 22px;
+    backdrop-filter: blur(8px);
+  }
+
+  .disclaimer-bar strong {
+    color: var(--pink-light);
+    font-weight: 700;
+  }
+
+  /* Card */
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: linear-gradient(145deg, #1c101f 0%, #0f0d14 100%);
+    border: 1px solid rgba(255,45,120,0.18);
+    border-radius: 24px;
+    padding: 36px 28px 32px;
+    box-shadow:
+      0 0 0 1px rgba(255,45,120,0.08),
+      0 30px 80px rgba(0,0,0,0.6),
+      0 0 60px rgba(255,45,120,0.06) inset;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--pink), transparent);
+  }
+
+  /* Logo / badge */
+  .badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .badge-icon {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--pink), #c4006b);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px var(--pink-glow);
+    font-size: 18px;
+  }
+
+  .badge-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    background: linear-gradient(90deg, var(--pink-light), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Age gate section */
+  #age-gate { display: block; }
+  #result-section { display: none; }
+
+  .headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1.2;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #fff;
+  }
+
+  .headline span {
+    background: linear-gradient(90deg, var(--pink-light), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .sub {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .age-question {
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  .age-note {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  /* Buttons */
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 16px 10px;
+    border-radius: 14px;
+    font-family: 'Raleway', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-yes {
+    background: linear-gradient(135deg, var(--pink) 0%, #c4006b 100%);
+    color: #fff;
+    box-shadow: 0 4px 24px rgba(255,45,120,0.4);
+  }
+
+  .btn-yes:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 12px rgba(255,45,120,0.3);
+  }
+
+  .btn-no {
+    background: rgba(255,255,255,0.05);
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .btn-no:active {
+    transform: scale(0.97);
+    background: rgba(255,255,255,0.08);
+  }
+
+  /* Pulse effect on yes button */
+  .btn-yes::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.15);
+    opacity: 0;
+    border-radius: inherit;
+    transition: opacity 0.15s;
+  }
+  .btn-yes:active::after { opacity: 1; }
+
+  .legal-note {
+    font-size: 10px;
+    color: rgba(154,127,168,0.6);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 24px 0;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,45,120,0.15);
+  }
+  .divider-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--pink);
+    box-shadow: 0 0 8px var(--pink);
+  }
+
+  /* Result sections */
+  .result-yes, .result-no { display: none; }
+
+  /* YES result */
+  .welcome-icon {
+    font-size: 52px;
+    text-align: center;
+    margin-bottom: 16px;
+    animation: pop 0.4s cubic-bezier(0.175,0.885,0.32,1.275) both;
+  }
+
+  @keyframes pop {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+
+  .welcome-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 900;
+    text-align: center;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .welcome-sub {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .btn-group-go {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-group-link {
+    display: block;
+    text-decoration: none;
+    width: 100%;
+    padding: 17px 10px;
+    border-radius: 14px;
+    font-family: 'Raleway', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-align: center;
+    color: #fff;
+    background: linear-gradient(135deg, var(--pink) 0%, #c4006b 100%);
+    box-shadow: 0 4px 28px rgba(255,45,120,0.45);
+    transition: all 0.2s;
+  }
+
+  .btn-group-link:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 14px rgba(255,45,120,0.3);
+  }
+
+  .btn-group-link .arrow {
+    display: inline-block;
+    margin-left: 8px;
+    transition: transform 0.2s;
+  }
+
+  .btn-group-link:hover .arrow {
+    transform: translateX(4px);
+  }
+
+  /* Disclaimer after confirm */
+  .confirm-disclaimer {
+    font-size: 10px;
+    color: rgba(154,127,168,0.55);
+    text-align: center;
+    line-height: 1.6;
+    margin-top: 20px;
+    padding: 10px 0 0;
+    border-top: 1px solid rgba(255,45,120,0.08);
+  }
+
+  /* NO result */
+  .blocked-icon {
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 16px;
+    animation: pop 0.4s cubic-bezier(0.175,0.885,0.32,1.275) both;
+  }
+
+  .blocked-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .blocked-sub {
+    font-size: 13px;
+    color: rgba(154,127,168,0.6);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .btn-back {
+    width: 100%;
+    padding: 15px;
+    border-radius: 14px;
+    font-family: 'Raleway', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255,255,255,0.05);
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s;
+  }
+
+  .btn-back:active {
+    background: rgba(255,255,255,0.09);
+    transform: scale(0.98);
+  }
+
+  /* Floating particles */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--pink);
+    opacity: 0;
+    animation: float linear infinite;
+  }
+
+  @keyframes float {
+    0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.3; }
+    100% { transform: translateY(-20px) scale(1); opacity: 0; }
+  }
+
+  /* Fade in animation */
+  .fade-in {
+    animation: fadeIn 0.5s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Shimmer on card top border */
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .card::before {
+    background: linear-gradient(90deg, transparent 0%, var(--pink) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+    height: 1.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+<div class="glow-top"></div>
+
+<div class="wrapper">
+
+  <!-- Disclaimer bar -->
+  <div class="disclaimer-bar">
+    ⚠️ <strong>AVISO:</strong> Esta página <strong>NÃO pertence</strong> ao Facebook, Instagram ou Meta Platforms, Inc. Somos independentes e não temos nenhuma afiliação com essas empresas.
+  </div>
+
+  <!-- Main card -->
+  <div class="card fade-in">
+
+    <!-- Badge -->
+    <div class="badge">
+      <div class="badge-icon">🔥</div>
+      <div class="badge-text">ACESSO EXCLUSIVO</div>
+    </div>
+
+    <!-- AGE GATE -->
+    <div id="age-gate">
+      <h1 class="headline">Conteúdo <span>+18</span><br>Para Adultos</h1>
+      <p class="sub">Este grupo contém conteúdo adulto exclusivo. Por favor, confirme sua idade antes de prosseguir.</p>
+
+      <div class="divider"><div class="divider-dot"></div></div>
+
+      <p class="age-question">Você tem 18 anos ou mais?</p>
+      <p class="age-note">Ao confirmar, você declara ser maior de idade em seu país.</p>
+
+      <div class="btn-group">
+        <button class="btn btn-yes" onclick="showYes()">✅ SIM, tenho +18</button>
+        <button class="btn btn-no" onclick="showNo()">❌ NÃO</button>
+      </div>
+
+      <p class="legal-note">Ao clicar em "SIM" você confirma ter idade legal para acessar este conteúdo e concorda com os termos de uso.</p>
+    </div>
+
+    <!-- RESULT SECTION -->
+    <div id="result-section">
+
+      <!-- YES -->
+      <div class="result-yes" id="res-yes">
+        <div class="welcome-icon">🎉</div>
+        <h2 class="welcome-title">Acesso Liberado!</h2>
+        <p class="welcome-sub">Ótimo! Você confirmou sua idade. Agora você pode acessar o grupo exclusivo com conteúdo especial.</p>
+
+        <div class="btn-group-go">
+          <a href="#" class="btn-group-link" id="group-link">
+            Ir para o Grupo <span class="arrow">→</span>
+          </a>
+        </div>
+
+        <p class="confirm-disclaimer">
+          🚫 Esta página é <strong style="color:var(--pink-light)">independente</strong> e não possui qualquer vínculo com o Facebook, Instagram ou Meta Platforms, Inc. O acesso ao grupo é de responsabilidade exclusiva do usuário.
+        </p>
+      </div>
+
+      <!-- NO -->
+      <div class="result-no" id="res-no">
+        <div class="blocked-icon">🔞</div>
+        <h2 class="blocked-title">Acesso Negado</h2>
+        <p class="blocked-sub">Você precisa ter 18 anos ou mais para acessar este conteúdo. Volte quando tiver a idade necessária.</p>
+        <button class="btn-back" onclick="goBack()">← Voltar</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Generate floating particles
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 4 + 2;
+    p.style.cssText = `
+      width: ${size}px;
+      height: ${size}px;
+      left: ${Math.random() * 100}%;
+      animation-duration: ${Math.random() * 8 + 6}s;
+      animation-delay: ${Math.random() * 8}s;
+      opacity: ${Math.random() * 0.5 + 0.1};
+    `;
+    container.appendChild(p);
+  }
+
+  function showYes() {
+    document.getElementById('age-gate').style.display = 'none';
+    document.getElementById('result-section').style.display = 'block';
+    document.getElementById('res-yes').style.display = 'block';
+    document.getElementById('res-no').style.display = 'none';
+
+    // Set your group link here
+    document.getElementById('group-link').href = 'https://www.facebook.com/groups/seu-grupo-aqui';
+
+    // Animate in
+    document.getElementById('res-yes').style.animation = 'fadeIn 0.4s ease both';
+  }
+
+  function showNo() {
+    document.getElementById('age-gate').style.display = 'none';
+    document.getElementById('result-section').style.display = 'block';
+    document.getElementById('res-yes').style.display = 'none';
+    document.getElementById('res-no').style.display = 'block';
+
+    document.getElementById('res-no').style.animation = 'fadeIn 0.4s ease both';
+  }
+
+  function goBack() {
+    document.getElementById('age-gate').style.display = 'block';
+    document.getElementById('result-section').style.display = 'none';
+    document.getElementById('res-yes').style.display = 'none';
+    document.getElementById('res-no').style.display = 'none';
+  }
+</script>
+</body>
+</html>
