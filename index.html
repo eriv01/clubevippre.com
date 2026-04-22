@@ -392,6 +392,25 @@
     transform: scale(0.98);
   }
 
+  /* Background images grid */
+  .bg-images {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.05;
+    filter: blur(2px) saturate(1.2);
+  }
+
   /* Floating particles */
   .particles {
     position: fixed;
@@ -443,6 +462,15 @@
 <body>
 
 <div class="particles" id="particles"></div>
+
+<!-- Background images 5% opacity, 2x2 grid -->
+<div class="bg-images">
+  <img class="bg-img" src="https://metodotripe.shop/wp-content/uploads/2026/04/primeira-trans-do-miss-bumbum-mostra-frente-e-verso-de-biquini-fotos-espacos-3502ebcd-8562-4632-940d-4a1105bd9068.jpg.webp" alt="">
+  <img class="bg-img" src="https://metodotripe.shop/wp-content/uploads/2026/04/66ab6589-dd1d-4cea-ae72-754345f55ebf-c6d5d0412452523c8117401736789643-480-0.webp" alt="">
+  <img class="bg-img" src="https://metodotripe.shop/wp-content/uploads/2026/04/ddec2504-ac42-4ae2-bfad-66dff8d341c5.png" alt="">
+  <img class="bg-img" src="https://metodotripe.shop/wp-content/uploads/2026/04/images-_22_.jpg" alt="">
+</div>
+
 <div class="glow-top"></div>
 
 <div class="wrapper">
@@ -536,8 +564,7 @@
     document.getElementById('res-yes').style.display = 'block';
     document.getElementById('res-no').style.display = 'none';
 
-    // Set your group link here
-    document.getElementById('group-link').href = 'https://www.facebook.com/groups/seu-grupo-aqui';
+    document.getElementById('group-link').href = 'https://clubetransvip-com.vercel.app/';
 
     // Animate in
     document.getElementById('res-yes').style.animation = 'fadeIn 0.4s ease both';
